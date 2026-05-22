@@ -60,7 +60,7 @@ For Gmail, you need to create an "App Password":
 - Admin panel for managing products
 - Product comparison tool
 - Search functionality
-- Contact form with email notifications to rishipadwal78@gmail.com
+- Contact form with email notifications to work.aniket4@gmail.com
 - Responsive design
 
 ## Database
