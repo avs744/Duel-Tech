@@ -1,0 +1,434 @@
+{% extends "base.html" %}
+
+{% block title %}Compare Products - DuelTech{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="glass-card p-4">
+        <h1 class="text-center mb-4">Product Comparison</h1>
+        
+        <!-- Advanced Comparison Controls -->
+        <div class="comparison-controls glass-card p-3 mb-4">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="category-filter">
+                        <label for="categorySelect" class="form-label">Filter by Category:</label>
+                        <select id="categorySelect" class="form-select">
+                            {% for cat_id, cat in categories.items() %}
+                            <option value="{{ cat_id }}" {% if cat_id == selected_category %}selected{% endif %}>{{ cat.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <label for="viewModeSelect" class="form-label">View Mode:</label>
+                    <select id="viewModeSelect" class="form-select">
+                        <option value="standard" {% if view_mode == 'standard' %}selected{% endif %}>Standard View</option>
+                        <option value="compact" {% if view_mode == 'compact' %}selected{% endif %}>Compact View</option>
+                        <option value="differences" {% if view_mode == 'differences' %}selected{% endif %}>Differences Only</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-3">
+                    <label for="highlightToggle" class="form-label">Highlight Differences:</label>
+                    <div class="form-check form-switch mt-2">
+                        <input class="form-check-input" type="checkbox" id="highlightToggle" {% if highlight_diffs == 'on' %}checked{% endif %}>
+                        <label class="form-check-label" for="highlightToggle">Enable</label>
+                    </div>
+                </div>
+                
+                <div class="col-md-3 text-end d-flex align-items-end justify-content-end">
+                    <a href="{{ url_for('products_page') }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Add More Products
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        {% if products|length > 0 %}
+        <div class="table-responsive comparison-table">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th class="feature-column">Features</th>
+                        {% for product in products %}
+                        <th class="text-center product-column">
+                            <div class="product-header">
+                                <div class="product-actions text-end mb-2">
+                                    <button class="btn btn-sm btn-outline-danger remove-product" data-product-id="{{ product.id }}">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <h4>{{ product.name }}</h4>
+                                <div class="product-icon-wrapper mb-3">
+                                    <i class="fas fa-microchip fa-4x product-icon"></i>
+                                </div>
+                                <div class="price mb-2">{{ product.price }}</div>
+                                <div class="rating mb-3">
+                                    {% for i in range(product.rating|int) %}
+                                    <i class="fas fa-star text-warning"></i>
+                                    {% endfor %}
+                                    {% if (product.rating % 1) >= 0.5 %}
+                                    <i class="fas fa-star-half-alt text-warning"></i>
+                                    {% endif %}
+                                </div>
+                                <a href="{{ url_for('product_detail', product_id=product.id) }}" class="btn btn-sm btn-primary">View Details</a>
+                            </div>
+                        </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- General section -->
+                    <tr class="section-header">
+                        <td colspan="{{ products|length + 1 }}" class="text-start">
+                            <h5><i class="fas fa-info-circle me-2"></i>General Information</h5>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold">Brand</td>
+                        {% for product in products %}
+                        <td class="text-center">{{ product.brand }}</td>
+                        {% endfor %}
+                    </tr>
+                    
+                    <!-- Specs section -->
+                    <tr class="section-header">
+                        <td colspan="{{ products|length + 1 }}" class="text-start">
+                            <h5><i class="fas fa-microchip me-2"></i>Technical Specifications</h5>
+                        </td>
+                    </tr>
+                    {% for spec in all_specs_keys %}
+                    {% if view_mode != 'differences' or spec in differences %}
+                    <tr class="{% if spec in differences %}diff-row{% endif %}">
+                        <td class="fw-bold text-capitalize">{{ spec.replace('_', ' ') }}</td>
+                        {% for product in products %}
+                        {% set is_best = highlight_diffs == 'on' and spec in differences and loop.index0 == differences[spec]['best_index'] %}
+                        <td class="text-center {% if is_best %}best-value{% elif spec in differences %}diff-value{% elif loop.index is even %}highlight-cell{% endif %}">
+                            {% if is_best %}<i class="fas fa-check-circle text-success me-1"></i>{% endif %}
+                            {{ product.specs.get(spec, 'N/A') }}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Similar Products Recommendations -->
+        {% if similar_products|length > 0 %}
+        <div class="similar-products-section mt-5 mb-4">
+            <h3 class="text-center mb-4"><i class="fas fa-lightbulb me-2"></i>You Might Also Like</h3>
+            <div class="row">
+                {% for product in similar_products %}
+                <div class="col-md-4 mb-3">
+                    <div class="similar-product glass-card p-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="mb-0">{{ product.name }}</h5>
+                            <span class="badge bg-primary">{{ product.price }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="rating">
+                                {% for i in range(product.rating|int) %}
+                                <i class="fas fa-star text-warning"></i>
+                                {% endfor %}
+                                {% if (product.rating % 1) >= 0.5 %}
+                                <i class="fas fa-star-half-alt text-warning"></i>
+                                {% endif %}
+                            </div>
+                            <div class="d-flex">
+                                <a href="{{ url_for('product_detail', product_id=product.id) }}" class="btn btn-sm btn-outline-primary me-2">
+                                    <i class="fas fa-info-circle"></i>
+                                </a>
+                                <button class="btn btn-sm btn-primary add-to-compare" data-product-id="{{ product.id }}">
+                                    <i class="fas fa-plus"></i> Compare
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="text-center mt-4">
+            <a href="{{ url_for('products_page') }}" class="btn btn-primary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Products
+            </a>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <div class="mb-4">
+                <i class="fas fa-exchange-alt fa-5x text-muted"></i>
+            </div>
+            <h3>No products selected for comparison</h3>
+            <p class="lead mb-4">Select products from our catalog to compare their features side by side.</p>
+            <a href="{{ url_for('products_page') }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-search me-2"></i>Browse Products
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.product-header {
+    text-align: center;
+    padding: 1rem;
+}
+.table td, .table th {
+    padding: 1rem;
+    vertical-align: middle;
+}
+.price {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #2ecc71;
+}
+.rating {
+    font-size: 1.1rem;
+}
+.feature-column {
+    min-width: 180px;
+    background-color: rgba(15, 15, 35, 0.8);
+}
+.product-column {
+    min-width: 220px;
+}
+.section-header {
+    background-color: rgba(0, 247, 255, 0.1);
+}
+.section-header h5 {
+    margin: 0;
+    padding: 10px 0;
+    color: var(--primary-color);
+}
+.highlight-cell {
+    background-color: rgba(0, 247, 255, 0.05);
+}
+.comparison-table {
+    box-shadow: 0 0 20px rgba(0, 247, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+}
+.product-icon {
+    color: var(--primary-color);
+    animation: float 3s ease-in-out infinite;
+}
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+
+/* New styles for advanced comparison features */
+.comparison-controls {
+    background-color: rgba(15, 15, 35, 0.7);
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+.diff-row {
+    background-color: rgba(255, 255, 0, 0.05);
+}
+.diff-value {
+    background-color: rgba(255, 255, 0, 0.1);
+    position: relative;
+}
+.best-value {
+    background-color: rgba(46, 204, 113, 0.15) !important;
+    font-weight: bold;
+    color: #2ecc71;
+}
+.similar-product {
+    transition: all 0.3s ease;
+    height: 100%;
+}
+.similar-product:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 247, 255, 0.2);
+}
+.compact-view td {
+    padding: 0.5rem !important;
+    font-size: 0.9rem;
+}
+.feature-tooltip {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(15, 15, 35, 0.9);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    z-index: 100;
+    display: none;
+}
+.diff-value:hover .feature-tooltip {
+    display: block;
+}
+</style>
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle category filter change
+        const categorySelect = document.getElementById('categorySelect');
+        if (categorySelect) {
+            categorySelect.addEventListener('change', function() {
+                updateComparisonUrl('category', this.value);
+            });
+        }
+        
+        // Handle view mode change
+        const viewModeSelect = document.getElementById('viewModeSelect');
+        if (viewModeSelect) {
+            viewModeSelect.addEventListener('change', function() {
+                updateComparisonUrl('view', this.value);
+                
+                // Apply compact view immediately
+                const table = document.querySelector('.comparison-table table');
+                if (this.value === 'compact') {
+                    table.classList.add('compact-view');
+                } else {
+                    table.classList.remove('compact-view');
+                }
+                
+                // Hide non-difference rows if in differences mode
+                if (this.value === 'differences') {
+                    document.querySelectorAll('tr:not(.diff-row):not(.section-header)').forEach(row => {
+                        if (!row.querySelector('th.feature-column')) {
+                            row.style.display = 'none';
+                        }
+                    });
+                } else {
+                    document.querySelectorAll('tr').forEach(row => {
+                        row.style.display = '';
+                    });
+                }
+            });
+        }
+        
+        // Handle highlight toggle
+        const highlightToggle = document.getElementById('highlightToggle');
+        if (highlightToggle) {
+            highlightToggle.addEventListener('change', function() {
+                updateComparisonUrl('highlight', this.checked ? 'on' : 'off');
+                
+                // Apply highlighting immediately
+                const bestValues = document.querySelectorAll('.best-value');
+                const diffValues = document.querySelectorAll('.diff-value');
+                
+                if (this.checked) {
+                    bestValues.forEach(cell => cell.classList.add('best-value'));
+                    diffValues.forEach(cell => cell.classList.add('diff-value'));
+                } else {
+                    bestValues.forEach(cell => cell.classList.remove('best-value'));
+                    diffValues.forEach(cell => cell.classList.remove('diff-value'));
+                }
+            });
+        }
+        
+        // Handle remove product buttons
+        const removeButtons = document.querySelectorAll('.remove-product');
+        removeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const productId = this.getAttribute('data-product-id');
+                removeProductFromComparison(productId);
+            });
+        });
+        
+        // Handle add to compare buttons for similar products
+        const addButtons = document.querySelectorAll('.add-to-compare');
+        addButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const productId = this.getAttribute('data-product-id');
+                addProductToComparison(productId);
+            });
+        });
+        
+        // Apply view mode on page load
+        if (viewModeSelect && viewModeSelect.value === 'compact') {
+            document.querySelector('.comparison-table table').classList.add('compact-view');
+        }
+        
+        if (viewModeSelect && viewModeSelect.value === 'differences') {
+            document.querySelectorAll('tr:not(.diff-row):not(.section-header)').forEach(row => {
+                if (!row.querySelector('th.feature-column')) {
+                    row.style.display = 'none';
+                }
+            });
+        }
+        
+        // Helper function to update URL parameters
+        function updateComparisonUrl(paramName, paramValue) {
+            const url = new URL(window.location.href);
+            const params = new URLSearchParams(url.search);
+            
+            // Update parameter
+            params.set(paramName, paramValue);
+            
+            // Redirect to updated URL
+            window.location.href = url.pathname + '?' + params.toString();
+        }
+        
+        // Remove product from comparison
+        function removeProductFromComparison(productId) {
+            // Get current URL and parameters
+            const url = new URL(window.location.href);
+            const params = new URLSearchParams(url.search);
+            
+            // Get all product IDs
+            const productIds = params.getAll('product_id');
+            
+            // Remove the selected product ID
+            const updatedIds = productIds.filter(id => id !== productId);
+            
+            // Update URL parameters
+            params.delete('product_id');
+            updatedIds.forEach(id => params.append('product_id', id));
+            
+            // Redirect to updated URL
+            window.location.href = url.pathname + '?' + params.toString();
+        }
+        
+        // Add product to comparison
+        function addProductToComparison(productId) {
+            // Get current URL and parameters
+            const url = new URL(window.location.href);
+            const params = new URLSearchParams(url.search);
+            
+            // Get all product IDs
+            const productIds = params.getAll('product_id');
+            
+            // Add the new product ID if it doesn't already exist
+            if (!productIds.includes(productId)) {
+                params.append('product_id', productId);
+            }
+            
+            // Redirect to updated URL
+            window.location.href = url.pathname + '?' + params.toString();
+        }
+        
+        // Add tooltips to difference cells
+        document.querySelectorAll('.diff-value').forEach(cell => {
+            const tooltip = document.createElement('div');
+            tooltip.className = 'feature-tooltip';
+            tooltip.textContent = 'Different Value';
+            cell.appendChild(tooltip);
+        });
+        
+        document.querySelectorAll('.best-value').forEach(cell => {
+            const tooltip = document.createElement('div');
+            tooltip.className = 'feature-tooltip';
+            tooltip.textContent = 'Best Value';
+            cell.appendChild(tooltip);
+        });
+    });
+    });
+</script>
+{% endblock %}
+{% endblock %}

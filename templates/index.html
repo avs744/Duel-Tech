@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+
+{% block title %}DuelTech - Compare Tech Products{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 mb-4">
+                    <span class="gradient-text">Compare Tech Products</span> 
+                    <span class="typewriter-text">with Ease</span>
+                </h1>
+                <p class="lead mb-4">Find and compare the best tech products across multiple categories to make informed decisions.</p>
+                <div class="d-flex gap-3 mb-5">
+                    <a href="{{ url_for('products_page') }}" class="btn btn-primary btn-lg glow-effect">
+                        <i class="fas fa-search me-2"></i> Explore Products
+                    </a>
+                    <a href="{{ url_for('compare') }}" class="btn btn-outline-light btn-lg border-glow">
+                        <i class="fas fa-exchange-alt me-2"></i> Compare Now
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-3d-device float-3d">
+                    <div id="hero-3d-model"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Categories Section -->
+<div class="container py-5">
+    <div class="section-header text-center mb-5">
+        <h2 class="gradient-text">Tech Categories</h2>
+        <p class="lead">Explore our wide range of tech categories</p>
+    </div>
+    
+    <div class="category-grid">
+        <div class="row g-4">
+            {% for category_id, category in categories.items() %}
+            <div class="col-md-4 col-lg-3">
+                <a href="{{ url_for('category', category_id=category_id) }}" class="tech-category-btn">
+                    <div class="glass-card h-100 p-4 text-center category-card glow-effect">
+                        <i class="{{ category.icon }} fa-3x mb-3 category-icon"></i>
+                        <h3>{{ category.name }}</h3>
+                        <p class="mb-0">{{ category.description }}</p>
+                        <div class="category-hover-info">
+                            <span class="badge bg-primary">View Products</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="container py-5">
+    <div class="section-header text-center mb-5">
+        <h2 class="gradient-text">Why Choose DuelTech</h2>
+        <p class="lead">Make informed decisions with our powerful tools</p>
+    </div>
+    
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="glass-card h-100 p-4 text-center feature-card pulse">
+                <div class="feature-icon-wrapper">
+                    <i class="fas fa-search fa-3x mb-3"></i>
+                </div>
+                <h3>Advanced Search</h3>
+                <p>Find products quickly with our advanced filtering and search capabilities.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="glass-card h-100 p-4 text-center feature-card pulse">
+                <div class="feature-icon-wrapper">
+                    <i class="fas fa-exchange-alt fa-3x mb-3"></i>
+                </div>
+                <h3>Side-by-Side Comparison</h3>
+                <p>Compare multiple products at once to make the best choice for your needs.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="glass-card h-100 p-4 text-center feature-card pulse">
+                <div class="feature-icon-wrapper">
+                    <i class="fas fa-chart-line fa-3x mb-3"></i>
+                </div>
+                <h3>Detailed Specifications</h3>
+                <p>Access in-depth technical specifications for all products in our database.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Popular Products Section -->
+<div class="container py-5">
+    <div class="section-header text-center mb-5">
+        <h2 class="gradient-text">Popular Products</h2>
+        <p class="lead">Trending tech products our users are comparing</p>
+        <div class="popular-products-info mb-4">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="glass-card p-4 mb-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="popular-products-icon me-3">
+                                <i class="fas fa-fire fa-2x text-accent"></i>
+                            </div>
+                            <div>
+                                <h4 class="mb-0">Why These Products?</h4>
+                            </div>
+                        </div>
+                        <p>These products are trending based on real user comparisons, expert reviews, and recent market performance. Our algorithms analyze thousands of data points to highlight the most relevant tech for you.</p>
+                        <div class="product-stats d-flex justify-content-around text-center mt-3">
+                            <div class="stat-item">
+                                <div class="stat-number gradient-text">5K+</div>
+                                <div class="stat-label">Weekly Comparisons</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number gradient-text">98%</div>
+                                <div class="stat-label">User Satisfaction</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number gradient-text">24hr</div>
+                                <div class="stat-label">Data Updates</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row g-4 popular-products-carousel">
+        {% for category in ['laptops', 'smartphones', 'graphics_cards', 'cpus'] %}
+            {% if category in products %}
+                {% for product in products[category][:3] %}
+                <div class="col-md-4 mb-4">
+                    <div class="glass-card h-100 product-card">
+                        <div class="product-card-inner">
+                            <div class="product-front">
+                                <div class="text-center p-4">
+                                    <div class="product-icon-wrapper mb-3">
+                                        <i class="{{ categories[category].icon }} fa-3x"></i>
+                                    </div>
+                                    <h4>{{ product.name }}</h4>
+                                    <p class="text-muted mb-2">{{ categories[category].name }}</p>
+                                    <div class="price-tag mb-3">${{ product.price }}</div>
+                                    <div class="product-rating mb-3">
+                                        {% for i in range(product.rating|int) %}
+                                            <i class="fas fa-star"></i>
+                                        {% endfor %}
+                                        {% if product.rating % 1 != 0 %}
+                                            <i class="fas fa-star-half-alt"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="product-popularity">
+                                        <span class="badge bg-primary mb-2">Top Rated</span>
+                                        <div class="popularity-meter">
+                                            <div class="progress mb-1">
+                                                <div class="progress-bar" role="progressbar" style="width: {{ 70 + (product.rating * 5)|int }}%"></div>
+                                            </div>
+                                            <small>Popularity: {{ 70 + (product.rating * 5)|int }}%</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="product-back">
+                                <div class="p-4">
+                                    <h4>Key Features</h4>
+                                    <ul class="product-specs">
+                                        {% for key, value in product.specs.items() %}
+                                            {% if loop.index <= 5 %}
+                                                <li><strong>{{ key }}:</strong> {{ value }}</li>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </ul>
+                                    <div class="mt-3 text-center">
+                                        <a href="{{ url_for('product_detail', product_id=product.id) }}" class="btn btn-primary btn-sm">View Details</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Call to Action Section -->
+<div class="container py-5">
+    <div class="glass-card p-5 text-center cta-section">
+        <h2 class="mb-4">Ready to Compare?</h2>
+        <p class="lead mb-4">Start comparing tech products now and find the perfect match for your needs.</p>
+        <a href="{{ url_for('compare') }}" class="btn btn-primary btn-lg glow-effect">
+            <i class="fas fa-exchange-alt me-2"></i> Start Comparing
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.12/typed.min.js"></script>
+<script>
+    // Initialize the hero 3D model
+    document.addEventListener('DOMContentLoaded', function() {
+        // Typewriter effect
+        var typed = new Typed('.typewriter-text', {
+            strings: ['with Ease', 'in Detail', 'Side by Side', 'Like a Pro'],
+            typeSpeed: 50,
+            backSpeed: 30,
+            backDelay: 2000,
+            loop: true
+        });
+        
+        // Product card flip effect
+        const productCards = document.querySelectorAll('.product-card');
+        productCards.forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.querySelector('.product-card-inner').style.transform = 'rotateY(180deg)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.querySelector('.product-card-inner').style.transform = 'rotateY(0deg)';
+            });
+        });
+        
+        // Category icon hover effects
+        const categoryIcons = document.querySelectorAll('.category-icon');
+        categoryIcons.forEach(icon => {
+            icon.addEventListener('mouseenter', () => {
+                icon.classList.add('fa-beat');
+            });
+            icon.addEventListener('mouseleave', () => {
+                icon.classList.remove('fa-beat');
+            });
+        });
+    });
+</script>
+<script src="{{ url_for('static', filename='js/hero-3d-model.js') }}"></script>
+<script src="{{ url_for('static', filename='js/brand-animations.js') }}"></script>
+{% endblock %}

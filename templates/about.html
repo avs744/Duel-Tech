@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}About Us - DuelTech{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card glass-effect mb-5">
+                <div class="card-body">
+                    <h1 class="text-center mb-4">About DuelTech</h1>
+                    <div class="mission-section text-center mb-5">
+                        <h3 class="mb-3">Our Mission</h3>
+                        <p class="lead">
+                            At DuelTech, we aim to simplify the tech decision-making process for everyone. Born from our own experiences 
+                            as students struggling to make informed tech choices, we created this platform to help others make 
+                            better decisions when comparing and choosing tech products.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-lg-12">
+            <div class="card glass-effect">
+                <div class="card-body">
+                    <h2 class="text-center mb-4">Meet Our Founders</h2>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="founder-card text-center mb-4">
+                                <div class="founder-avatar mb-3">
+                                    <i class="fas fa-user-circle fa-5x"></i>
+                                </div>
+                                <h4>Rishi Shirke Padwal</h4>
+                                <p class="text-muted">Co-Founder & Lead Developer</p>
+                                <p>Student at KJSEIT<br>SY AIDS B</p>
+                                <div class="contact-info">
+                                    <p><i class="fas fa-phone"></i> +91 8591588917</p>
+                                    <p><i class="fas fa-envelope"></i> rishipadwal78@gmail.com</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="founder-card text-center mb-4">
+                                <div class="founder-avatar mb-3">
+                                    <i class="fas fa-user-circle fa-5x"></i>
+                                </div>
+                                <h4>Sushant Sharma</h4>
+                                <p class="text-muted">Co-Founder & UI/UX Designer</p>
+                                <p>Student at KJSEIT<br>SY AIDS B</p>
+                                <div class="contact-info">
+                                    <p><i class="fas fa-envelope"></i> sushantsharma@gmail.com</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="founder-card text-center mb-4">
+                                <div class="founder-avatar mb-3">
+                                    <i class="fas fa-user-circle fa-5x"></i>
+                                </div>
+                                <h4>Aniket Shinde</h4>
+                                <p class="text-muted">Co-Founder & Backend Developer</p>
+                                <p>Student at KJSEIT<br>SY AIDS B</p>
+                                <div class="contact-info">
+                                    <p><i class="fas fa-envelope"></i> aniketshinde@gmail.com</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card glass-effect">
+                <div class="card-body">
+                    <h2 class="text-center mb-4">Our Story</h2>
+                    <div class="story-content">
+                        <p class="lead mb-4">
+                            As students of SY AIDS B at K. J. Somaiya Institute of Technology (KJSEIT), we often found ourselves 
+                            and our peers struggling to make informed decisions when purchasing tech products. The market is flooded 
+                            with options, making it increasingly difficult to compare and choose the right product that fits both 
+                            needs and budget.
+                        </p>
+                        <p class="mb-4">
+                            This challenge inspired us to create DuelTech - a platform that simplifies tech product comparisons. 
+                            Our goal is to help students, professionals, and tech enthusiasts make better purchasing decisions by 
+                            providing detailed comparisons, specifications, and user reviews all in one place.
+                        </p>
+                        <p class="mb-4">
+                            What sets us apart is our focus on providing clear, unbiased comparisons and our commitment to keeping 
+                            our information up-to-date. We understand the importance of making informed decisions, especially when 
+                            investing in technology.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-lg-12">
+            <div class="card glass-effect">
+                <div class="card-body text-center">
+                    <h3 class="mb-4">Get in Touch</h3>
+                    <p class="lead mb-4">Have questions or suggestions? We'd love to hear from you!</p>
+                    <div class="contact-buttons">
+                        <a href="mailto:rishipadwal78@gmail.com" class="btn btn-primary me-3">
+                            <i class="fas fa-envelope"></i> Email Us
+                        </a>
+                        <a href="tel:+918591588917" class="btn btn-primary">
+                            <i class="fas fa-phone"></i> Call Us
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.founder-card {
+    padding: 20px;
+    border-radius: 10px;
+    transition: transform 0.3s ease;
+}
+.founder-card:hover {
+    transform: translateY(-5px);
+}
+.founder-avatar {
+    color: #6c757d;
+}
+.contact-info {
+    margin-top: 15px;
+}
+.contact-info p {
+    margin-bottom: 5px;
+}
+.story-content {
+    text-align: justify;
+}
+</style>
+{% endblock %}

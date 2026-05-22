@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Products - DuelTech{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="glass-card p-4 mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Our Products</h1>
+            <a id="compareSelectedBtn" href="#" class="btn btn-primary disabled">
+                <i class="fas fa-exchange-alt"></i> Compare Selected (0)
+            </a>
+        </div>
+        
+        <!-- Search Bar -->
+        <div class="glass-card p-3 mb-4">
+            <form class="d-flex" action="{{ url_for('search') }}" method="get">
+                <input class="form-control me-2" type="search" name="q" placeholder="Search for tech products..." aria-label="Search">
+                <button class="btn btn-primary" type="submit">
+                    <i class="fas fa-search me-1"></i> Search
+                </button>
+            </form>
+        </div>
+        
+        <!-- Categories Grid -->
+        <div class="row g-4">
+            {% for category_id, category in categories.items() %}
+            <div class="col-md-4">
+                <div class="glass-card h-100 p-4 category-card">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="{{ category.icon }} fa-2x me-3"></i>
+                        <h3 class="mb-0">{{ category.name }}</h3>
+                    </div>
+                    <p class="text-muted mb-3">{{ category.description }}</p>
+                    
+                    <!-- Products List -->
+                    <div class="products-list">
+                        {% if category_id in all_products and all_products[category_id] %}
+                            {% for product in all_products[category_id][:3] %}
+                            <div class="product-item glass-card p-3 mb-2">
+                                <h5>{{ product.name }}</h5>
+                                <p class="mb-2">{{ product.price }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="rating">
+                                        {% for i in range(product.rating|int) %}
+                                        <i class="fas fa-star text-warning"></i>
+                                        {% endfor %}
+                                    </div>
+                                    <a href="{{ url_for('product_detail', product_id=product.id) }}" 
+                                       class="btn btn-primary btn-sm">View Details</a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            
+                            {% if all_products[category_id]|length > 3 %}
+                            <a href="{{ url_for('category', category_id=category_id) }}" 
+                               class="btn btn-outline-primary w-100 mt-3">View All {{ category.name }}</a>
+                            {% endif %}
+                        {% else %}
+                            <div class="text-center text-muted">
+                                <p>No products available in this category yet.</p>
+                                <p>Check back soon for updates!</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<style>
+.category-card {
+    transition: transform 0.3s ease;
+}
+.category-card:hover {
+    transform: translateY(-5px);
+}
+.product-item {
+    transition: transform 0.3s ease;
+}
+.product-item:hover {
+    transform: translateY(-3px);
+}
+</style>
+{% endblock %}

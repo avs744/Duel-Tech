@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Contact Us - DuelTech{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card glass-effect mb-4">
+                <div class="card-body">
+                    <h2 class="mb-4">Contact Information</h2>
+                    <div class="contact-info">
+                        <div class="mb-4">
+                            <h5><i class="fas fa-phone me-2"></i>Phone</h5>
+                            <p class="lead">+91 9975499107</p>
+                        </div>
+                        <div class="mb-4">
+                            <h5><i class="fas fa-envelope me-2"></i>Email</h5>
+                            <p class="lead">work.aniket4@gmail.com</p>
+                        </div>
+                        <div class="mb-4">
+                            <h5><i class="fas fa-map-marker-alt me-2"></i>Address</h5>
+                            <p class="lead">K. J. Somaiya Institute of Technology<br>Somaiya Ayurvihar Complex,<br>Eastern Express Highway,<br>Sion, Mumbai - 400022</p>
+                        </div>
+                        <div class="mb-4">
+                            <h5><i class="fas fa-clock me-2"></i>Business Hours</h5>
+                            <p class="lead">
+                                Monday - Friday: 9:00 AM - 6:00 PM<br>
+                                Saturday: 10:00 AM - 4:00 PM<br>
+                                Sunday: Closed
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card glass-effect">
+                <div class="card-body">
+                    <h2 class="mb-4">Send us a Message</h2>
+                    <form action="{{ url_for('contact') }}" method="POST">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="subject" class="form-label">Subject</label>
+                            <input type="text" class="form-control" id="subject" name="subject" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Message</label>
+                            <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-2"></i>Send Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-lg-12">
+            <div class="card glass-effect">
+                <div class="card-body">
+                    <h2 class="text-center mb-4">Connect With Us</h2>
+                    <div class="social-links text-center">
+                        <a href="#" class="btn btn-outline-primary me-3">
+                            <i class="fab fa-facebook me-2"></i>Facebook
+                        </a>
+                        <a href="#" class="btn btn-outline-primary me-3">
+                            <i class="fab fa-twitter me-2"></i>Twitter
+                        </a>
+                        <a href="#" class="btn btn-outline-primary me-3">
+                            <i class="fab fa-linkedin me-2"></i>LinkedIn
+                        </a>
+                        <a href="#" class="btn btn-outline-primary">
+                            <i class="fab fa-instagram me-2"></i>Instagram
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.form-control {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-color);
+}
+.form-control:focus {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--primary-color);
+    color: var(--text-color);
+    box-shadow: 0 0 0 0.25rem rgba(98, 0, 234, 0.25);
+}
+.social-links .btn {
+    transition: all 0.3s ease;
+}
+.social-links .btn:hover {
+    transform: translateY(-3px);
+}
+</style>
+{% endblock %}

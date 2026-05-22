@@ -1,0 +1,24 @@
+[build]
+  command = "pip install -r requirements.txt && python init_db.py"
+  publish = "."
+
+[build.environment]
+  PYTHON_VERSION = "3.9"
+
+[functions]
+  directory = "api"
+
+[[redirects]]
+  from = "/static/*"
+  to = "/static/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions/index"
+  status = 200

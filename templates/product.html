@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }} - DuelTech{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="glass-card product-showcase p-4 mb-4">
+                <div class="product-icon-wrapper mb-4">
+                    <i class="fas fa-microchip fa-5x product-main-icon"></i>
+                </div>
+                <h2 class="product-title gradient-text text-center mb-3">{{ product.name }}</h2>
+                <div class="product-rating mb-3 text-center">
+                    {% for i in range(product.rating|int) %}
+                        <i class="fas fa-star"></i>
+                    {% endfor %}
+                    {% for i in range(5 - product.rating|int) %}
+                        <i class="far fa-star"></i>
+                    {% endfor %}
+                    <span class="ms-2 text-muted">({{ product.reviews|default(0) }} reviews)</span>
+                </div>
+                <div class="price-tag text-center mb-4">{{ product.price }}</div>
+                <div class="product-actions d-flex justify-content-center gap-3">
+                    <button onclick="addToCompare('{{ product.id }}')" class="btn btn-primary glow-effect" id="compareBtn">
+                        <i class="fas fa-exchange-alt me-2"></i> Add to Comparison
+                    </button>
+                    <button class="btn btn-outline-light border-glow">
+                        <i class="fas fa-bookmark me-2"></i> Save
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="glass-card p-4">
+                <h3 class="mb-4">Specifications</h3>
+                <ul class="product-specs">
+                    {% for key, value in product.specs.items() %}
+                    <li><strong>{{ key }}:</strong> {{ value }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="glass-card p-4">
+                <h3 class="mb-4">About {{ product.name }}</h3>
+                <p>{{ product.description|default('No description available.') }}</p>
+                
+                <h4 class="mt-4 mb-3">Key Features</h4>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="feature-card text-center p-3">
+                            <div class="feature-icon-wrapper">
+                                <i class="fas fa-bolt fa-3x text-primary"></i>
+                            </div>
+                            <h5>Performance</h5>
+                            <p>Exceptional speed and reliability for demanding tasks.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="feature-card text-center p-3">
+                            <div class="feature-icon-wrapper">
+                                <i class="fas fa-battery-full fa-3x text-primary"></i>
+                            </div>
+                            <h5>Battery Life</h5>
+                            <p>Long-lasting power for all-day productivity.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="feature-card text-center p-3">
+                            <div class="feature-icon-wrapper">
+                                <i class="fas fa-shield-alt fa-3x text-primary"></i>
+                            </div>
+                            <h5>Durability</h5>
+                            <p>Built to last with premium materials and construction.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-5">
+        <a href="{{ url_for('index') }}" class="btn btn-outline-light">
+            <i class="fas fa-arrow-left me-2"></i> Back to Home
+        </a>
+    </div>
+</div>
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add floating animation to product icon
+        const productIcon = document.querySelector('.product-main-icon');
+        if (productIcon) {
+            productIcon.style.animation = 'float 3s ease-in-out infinite';
+        }
+        
+        // Glow effect for action buttons
+        const buttons = document.querySelectorAll('.product-actions button');
+        buttons.forEach(button => {
+            button.addEventListener('mouseenter', () => {
+                button.style.boxShadow = '0 0 15px var(--glow-color)';
+            });
+            button.addEventListener('mouseleave', () => {
+                button.style.boxShadow = '';
+            });
+        });
+        
+        // Check if product is already in comparison list
+        checkComparisonStatus();
+    });
+    
+    // Function to add product to comparison
+    function addToCompare(productId) {
+        const compareBtn = document.getElementById('compareBtn');
+        const MAX_COMPARE_PRODUCTS = 4;
+        
+        // Get current comparison products from URL params (if any)
+        const urlParams = new URLSearchParams(window.location.search);
+        let productIds = [];
+        
+        // Check localStorage for comparison products
+        if (localStorage.getItem('comparisonProducts')) {
+            productIds = JSON.parse(localStorage.getItem('comparisonProducts'));
+        }
+        
+        // Check if product is already in comparison
+        const index = productIds.indexOf(productId);
+        
+        if (index === -1) {
+            // Add product if not already in list and not exceeding max
+            if (productIds.length < MAX_COMPARE_PRODUCTS) {
+                productIds.push(productId);
+                compareBtn.classList.add('btn-success');
+                compareBtn.classList.remove('btn-primary');
+                compareBtn.innerHTML = '<i class="fas fa-check me-2"></i> Added to Comparison';
+                
+                // Show comparison link
+                showComparisonLink(productIds);
+            } else {
+                // Alert user if max products reached
+                alert(`You can compare up to ${MAX_COMPARE_PRODUCTS} products at a time.`);
+            }
+        } else {
+            // Remove product if already in list
+            productIds.splice(index, 1);
+            compareBtn.classList.add('btn-primary');
+            compareBtn.classList.remove('btn-success');
+            compareBtn.innerHTML = '<i class="fas fa-exchange-alt me-2"></i> Add to Comparison';
+            
+            // Update comparison link
+            if (productIds.length > 0) {
+                showComparisonLink(productIds);
+            } else {
+                hideComparisonLink();
+            }
+        }
+        
+        // Save to localStorage
+        localStorage.setItem('comparisonProducts', JSON.stringify(productIds));
+    }
+    
+    // Function to check if product is already in comparison
+    function checkComparisonStatus() {
+        const productId = '{{ product.id }}';
+        const compareBtn = document.getElementById('compareBtn');
+        
+        // Check localStorage for comparison products
+        if (localStorage.getItem('comparisonProducts')) {
+            const productIds = JSON.parse(localStorage.getItem('comparisonProducts'));
+            
+            // If product is in comparison list, update button
+            if (productIds.includes(productId)) {
+                compareBtn.classList.add('btn-success');
+                compareBtn.classList.remove('btn-primary');
+                compareBtn.innerHTML = '<i class="fas fa-check me-2"></i> Added to Comparison';
+                
+                // Show comparison link
+                showComparisonLink(productIds);
+            }
+        }
+    }
+    
+    // Function to show comparison link
+    function showComparisonLink(productIds) {
+        // Check if comparison link already exists
+        let comparisonLink = document.getElementById('viewComparisonLink');
+        
+        if (!comparisonLink) {
+            // Create comparison link if it doesn't exist
+            const container = document.querySelector('.container');
+            comparisonLink = document.createElement('div');
+            comparisonLink.id = 'viewComparisonLink';
+            comparisonLink.className = 'comparison-link-container text-center mt-4 p-3 glass-card';
+            container.insertBefore(comparisonLink, container.firstChild);
+        }
+        
+        // Build comparison URL
+        let compareUrl = "{{ url_for('compare') }}?";
+        productIds.forEach(id => {
+            compareUrl += `product_id=${id}&`;
+        });
+        
+        // Update comparison link content
+        comparisonLink.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="badge bg-primary">${productIds.length}</span> products selected for comparison
+                </div>
+                <a href="${compareUrl}" class="btn btn-primary">
+                    <i class="fas fa-exchange-alt me-2"></i> View Comparison
+                </a>
+            </div>
+        `;
+    }
+    
+    // Function to hide comparison link
+    function hideComparisonLink() {
+        const comparisonLink = document.getElementById('viewComparisonLink');
+        if (comparisonLink) {
+            comparisonLink.remove();
+        }
+    }
+</script>
+{% endblock %}
+{% endblock %}

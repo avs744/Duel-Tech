@@ -1,0 +1,430 @@
+{% extends "base.html" %}
+
+{% block title %}AI Product Fetch - DuelTech{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="glass-card p-4">
+        <h1 class="mb-4">AI Product Fetcher</h1>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <div class="row mb-5">
+            <div class="col-md-12">
+                <div class="glass-card p-4">
+                    <h3 class="mb-3"><i class="fas fa-robot me-2"></i>AI-Powered Product Data Retrieval</h3>
+                    <p class="text-muted mb-4">
+                        Enter a tech product name, and our AI will search online platforms to retrieve detailed specifications and information.
+                        The AI will automatically save the product to your database with comprehensive details.
+                    </p>
+                    
+                    <form action="{{ url_for('admin_ai_fetch_product') }}" method="post" id="aiFetchForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="productName" class="form-label">Product Name</label>
+                                <input type="text" class="form-control" id="productName" name="product_name" 
+                                       placeholder="e.g., Apple MacBook Pro 16-inch 2023" required>
+                                <small class="form-text text-muted">Be as specific as possible for better results</small>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="category" class="form-label">Category</label>
+                                <select class="form-select" id="category" name="category" required>
+                                    <option value="" selected disabled>Select category</option>
+                                    {% for category_id, category in categories.items() %}
+                                    <option value="{{ category_id }}">{{ category.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="fetchSource" class="form-label">Data Source</label>
+                                <select class="form-select" id="fetchSource" name="fetch_source">
+                                    <option value="auto" selected>Auto (Best Match)</option>
+                                    <option value="amazon">Amazon</option>
+                                    <option value="flipkart">Flipkart</option>
+                                    <option value="newegg">Newegg</option>
+                                    <option value="gsmarena">GSMArena (Phones)</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary" id="fetchButton">
+                                <i class="fas fa-search me-2"></i>Fetch Product Data
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div id="fetchingIndicator" class="text-center my-5 d-none">
+            <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <h4 class="text-muted">Fetching product data...</h4>
+            <p class="text-muted">This may take a few moments as our AI searches for comprehensive information.</p>
+        </div>
+        
+        <div id="fetchResults" class="d-none">
+            <h3 class="mb-4">Product Data Retrieved</h3>
+            <div class="glass-card p-4">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4 id="resultProductName"></h4>
+                        <p class="mb-3">
+                            <span class="badge bg-primary me-2" id="resultCategory"></span>
+                            <span class="badge bg-secondary" id="resultBrand"></span>
+                        </p>
+                        <h5 id="resultPrice" class="text-success mb-3"></h5>
+                        <div class="mb-3" id="resultRating"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Product Specifications</h5>
+                        <div id="resultSpecs" class="specs-list"></div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 text-center">
+                    <button id="editProductBtn" class="btn btn-primary me-2">
+                        <i class="fas fa-edit me-2"></i>Edit Product
+                    </button>
+                    <form action="{{ url_for('admin_ai_save_product') }}" method="post" id="aiSaveForm" class="d-inline">
+                        <input type="hidden" id="productData" name="product_data">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save me-2"></i>Save to Database
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-5">
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+            </a>
+        </div>
+        
+        <!-- Edit Product Modal -->
+        <div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editProductModalLabel">Edit Product Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="editProductForm">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="editProductName" class="form-label">Product Name</label>
+                                    <input type="text" class="form-control" id="editProductName" name="name" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="editProductBrand" class="form-label">Brand</label>
+                                    <input type="text" class="form-control" id="editProductBrand" name="brand" required>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="editProductPrice" class="form-label">Price</label>
+                                    <input type="text" class="form-control" id="editProductPrice" name="price" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="editProductRating" class="form-label">Rating (0-5)</label>
+                                    <input type="number" class="form-control" id="editProductRating" name="rating" min="0" max="5" step="0.1" required>
+                                </div>
+                            </div>
+                            
+                            <h5 class="mt-4 mb-3">Product Specifications</h5>
+                            <p class="text-muted small">You can edit existing specifications, add new ones, or remove unwanted specs.</p>
+                            
+                            <div id="editableSpecs" class="mb-3">
+                                <!-- Specs will be added here dynamically -->
+                            </div>
+                            
+                            <button type="button" id="addSpecBtn" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-plus me-1"></i>Add New Specification
+                            </button>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="saveEditedProductBtn">Save Changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .specs-list {
+        max-height: 300px;
+        overflow-y: auto;
+        padding-right: 10px;
+    }
+    
+    .spec-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .spec-item:last-child {
+        border-bottom: none;
+    }
+    
+    .text-success {
+        color: #2ecc71 !important;
+    }
+    
+    /* Custom scrollbar for specs list */
+    .specs-list::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .specs-list::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+    }
+    
+    .specs-list::-webkit-scrollbar-thumb {
+        background: var(--primary-color);
+        border-radius: 10px;
+    }
+    
+    /* Edit mode styles */
+    .editable-spec-row {
+        margin-bottom: 8px;
+    }
+    
+    #editableSpecs {
+        max-height: 350px;
+        overflow-y: auto;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fetchForm = document.getElementById('aiFetchForm');
+    const fetchingIndicator = document.getElementById('fetchingIndicator');
+    const fetchResults = document.getElementById('fetchResults');
+    const saveForm = document.getElementById('aiSaveForm');
+    const editProductBtn = document.getElementById('editProductBtn');
+    const editProductModal = new bootstrap.Modal(document.getElementById('editProductModal'));
+    const addSpecBtn = document.getElementById('addSpecBtn');
+    const saveEditedProductBtn = document.getElementById('saveEditedProductBtn');
+    
+    // Current product data
+    let currentProductData = null;
+    
+    fetchForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Show loading indicator
+        fetchingIndicator.classList.remove('d-none');
+        fetchResults.classList.add('d-none');
+        
+        // Get form data
+        const formData = new FormData(fetchForm);
+        
+        // Make AJAX request to fetch product data
+        fetch('{{ url_for("admin_ai_fetch_product") }}', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Hide loading indicator
+            fetchingIndicator.classList.add('d-none');
+            
+            if (data.success) {
+                // Store current product data
+                currentProductData = data.product;
+                
+                // Display results
+                document.getElementById('resultProductName').textContent = data.product.name;
+                document.getElementById('resultCategory').textContent = data.category_name;
+                document.getElementById('resultBrand').textContent = data.product.brand;
+                document.getElementById('resultPrice').textContent = data.product.price;
+                
+                // Display rating as stars
+                const ratingContainer = document.getElementById('resultRating');
+                ratingContainer.innerHTML = '';
+                const rating = Math.floor(data.product.rating);
+                const hasHalfStar = (data.product.rating % 1) >= 0.5;
+                
+                for (let i = 0; i < rating; i++) {
+                    ratingContainer.innerHTML += '<i class="fas fa-star text-warning"></i> ';
+                }
+                
+                if (hasHalfStar) {
+                    ratingContainer.innerHTML += '<i class="fas fa-star-half-alt text-warning"></i> ';
+                }
+                
+                // Display specs
+                const specsContainer = document.getElementById('resultSpecs');
+                specsContainer.innerHTML = '';
+                
+                for (const [key, value] of Object.entries(data.product.specs)) {
+                    const specItem = document.createElement('div');
+                    specItem.className = 'spec-item';
+                    specItem.innerHTML = `
+                        <small class="text-muted">${key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:</small>
+                        <span>${value}</span>
+                    `;
+                    specsContainer.appendChild(specItem);
+                }
+                
+                // Store product data for saving
+                document.getElementById('productData').value = JSON.stringify(data.product);
+                
+                // Show results
+                fetchResults.classList.remove('d-none');
+            } else {
+                // Show error message
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            fetchingIndicator.classList.add('d-none');
+            alert('Error fetching product data: ' + error);
+        });
+    });
+    
+    // Edit button click handler
+    editProductBtn.addEventListener('click', function() {
+        if (!currentProductData) return;
+        
+        // Populate edit form with current product data
+        document.getElementById('editProductName').value = currentProductData.name;
+        document.getElementById('editProductBrand').value = currentProductData.brand;
+        document.getElementById('editProductPrice').value = currentProductData.price;
+        document.getElementById('editProductRating').value = currentProductData.rating;
+        
+        // Populate specifications
+        const editableSpecs = document.getElementById('editableSpecs');
+        editableSpecs.innerHTML = '';
+        
+        for (const [key, value] of Object.entries(currentProductData.specs)) {
+            addSpecRow(key, value);
+        }
+        
+        // Show edit modal
+        editProductModal.show();
+    });
+    
+    // Add new specification row
+    addSpecBtn.addEventListener('click', function() {
+        addSpecRow('', '');
+    });
+    
+    // Function to add a specification row to the edit form
+    function addSpecRow(key, value) {
+        const editableSpecs = document.getElementById('editableSpecs');
+        const row = document.createElement('div');
+        row.className = 'row editable-spec-row';
+        
+        row.innerHTML = `
+            <div class="col-5">
+                <input type="text" class="form-control form-control-sm spec-key" placeholder="Specification name" value="${key}">
+            </div>
+            <div class="col-6">
+                <input type="text" class="form-control form-control-sm spec-value" placeholder="Specification value" value="${value}">
+            </div>
+            <div class="col-1">
+                <button type="button" class="btn btn-sm btn-outline-danger remove-spec">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `;
+        
+        editableSpecs.appendChild(row);
+        
+        // Add event listener to remove button
+        row.querySelector('.remove-spec').addEventListener('click', function() {
+            row.remove();
+        });
+    }
+    
+    // Save edited product
+    saveEditedProductBtn.addEventListener('click', function() {
+        // Get edited values
+        const editedProduct = {
+            ...currentProductData,
+            name: document.getElementById('editProductName').value,
+            brand: document.getElementById('editProductBrand').value,
+            price: document.getElementById('editProductPrice').value,
+            rating: parseFloat(document.getElementById('editProductRating').value),
+            specs: {}
+        };
+        
+        // Get all specification rows
+        const specRows = document.querySelectorAll('.editable-spec-row');
+        specRows.forEach(row => {
+            const key = row.querySelector('.spec-key').value.trim();
+            const value = row.querySelector('.spec-value').value.trim();
+            
+            if (key && value) {
+                // Convert spaces to underscores for keys
+                const formattedKey = key.toLowerCase().replace(/\s+/g, '_');
+                editedProduct.specs[formattedKey] = value;
+            }
+        });
+        
+        // Update current product data
+        currentProductData = editedProduct;
+        
+        // Update display
+        document.getElementById('resultProductName').textContent = editedProduct.name;
+        document.getElementById('resultBrand').textContent = editedProduct.brand;
+        document.getElementById('resultPrice').textContent = editedProduct.price;
+        
+        // Update rating display
+        const ratingContainer = document.getElementById('resultRating');
+        ratingContainer.innerHTML = '';
+        const rating = Math.floor(editedProduct.rating);
+        const hasHalfStar = (editedProduct.rating % 1) >= 0.5;
+        
+        for (let i = 0; i < rating; i++) {
+            ratingContainer.innerHTML += '<i class="fas fa-star text-warning"></i> ';
+        }
+        
+        if (hasHalfStar) {
+            ratingContainer.innerHTML += '<i class="fas fa-star-half-alt text-warning"></i> ';
+        }
+        
+        // Update specs display
+        const specsContainer = document.getElementById('resultSpecs');
+        specsContainer.innerHTML = '';
+        
+        for (const [key, value] of Object.entries(editedProduct.specs)) {
+            const specItem = document.createElement('div');
+            specItem.className = 'spec-item';
+            specItem.innerHTML = `
+                <small class="text-muted">${key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:</small>
+                <span>${value}</span>
+            `;
+            specsContainer.appendChild(specItem);
+        }
+        
+        // Update hidden input for form submission
+        document.getElementById('productData').value = JSON.stringify(editedProduct);
+        
+        // Close modal
+        editProductModal.hide();
+    });
+});
+</script>
+{% endblock %}

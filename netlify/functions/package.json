@@ -1,0 +1,10 @@
+{
+  "name": "dueltech-netlify-functions",
+  "version": "1.0.0",
+  "description": "Netlify Functions for DuelTech application",
+  "main": "index.js",
+  "dependencies": {
+    "child_process": "^1.0.2",
+    "path": "^0.12.7"
+  }
+}

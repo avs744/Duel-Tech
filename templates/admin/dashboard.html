@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - DuelTech{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="glass-card p-4">
+        <h1 class="mb-4">Admin Dashboard</h1>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <div class="row">
+            <div class="col-md-3 mb-4">
+                <div class="glass-card p-3 text-center">
+                    <div class="display-4 mb-2">
+                        <i class="fas fa-microchip text-primary"></i>
+                    </div>
+                    <h3>{{ product_count }}</h3>
+                    <p class="text-muted">Products</p>
+                    <a href="{{ url_for('admin_products') }}" class="btn btn-sm btn-primary">Manage Products</a>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-4">
+                <div class="glass-card p-3 text-center">
+                    <div class="display-4 mb-2">
+                        <i class="fas fa-robot text-primary"></i>
+                    </div>
+                    <h3>AI Product Fetcher</h3>
+                    <p class="text-muted">Auto-fetch product details</p>
+                    <a href="{{ url_for('admin_ai_fetch_product') }}" class="btn btn-sm btn-primary">Fetch Products</a>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-4">
+                <div class="glass-card p-3 text-center">
+                    <div class="display-4 mb-2">
+                        <i class="fas fa-users text-primary"></i>
+                    </div>
+                    <h3>User Management</h3>
+                    <p class="text-muted">Manage site users</p>
+                    <a href="{{ url_for('admin_users') }}" class="btn btn-sm btn-primary">Manage Users</a>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-4">
+                <div class="glass-card p-3 text-center">
+                    <div class="display-4 mb-2">
+                        <i class="fas fa-user-shield text-primary"></i>
+                    </div>
+                    <h3>Create Admin</h3>
+                    <p class="text-muted">Add new administrator</p>
+                    <a href="{{ url_for('create_admin') }}" class="btn btn-sm btn-primary">Add Admin</a>
+                </div>
+            </div>
+        </div>
+        
+        <h2 class="mt-5 mb-4">Product Categories</h2>
+        <div class="row">
+            {% for category_id, category in categories.items() %}
+            <div class="col-md-4 col-lg-3 mb-4">
+                <div class="glass-card p-3">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="{{ category.icon }} fa-2x text-primary"></i>
+                        </div>
+                        <div>
+                            <h5 class="m-0">{{ category.name }}</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="mt-4">
+            <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Site
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .text-primary {
+        color: var(--primary-color) !important;
+    }
+    
+    .glass-card .glass-card {
+        background: rgba(30, 30, 60, 0.4);
+    }
+</style>
+{% endblock %} 

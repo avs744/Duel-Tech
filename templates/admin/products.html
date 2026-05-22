@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Products - DuelTech{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="glass-card p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Manage Products</h1>
+            <a href="{{ url_for('admin_add_product') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Add New Product
+            </a>
+        </div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Brand</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Rating</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr>
+                        <td>{{ product.id }}</td>
+                        <td>{{ product.name }}</td>
+                        <td>{{ product.brand }}</td>
+                        <td>
+                            {% for cat_id, cat in categories.items() %}
+                                {% if cat_id in product.id %}
+                                    {{ cat.name }}
+                                {% endif %}
+                            {% endfor %}
+                        </td>
+                        <td>{{ product.price }}</td>
+                        <td>
+                            {% for i in range(product.rating|int) %}
+                            <i class="fas fa-star text-warning"></i>
+                            {% endfor %}
+                            {% if (product.rating % 1) >= 0.5 %}
+                            <i class="fas fa-star-half-alt text-warning"></i>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <a href="{{ url_for('admin_edit_product', product_id=product.id) }}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ product.id }}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                            
+                            <!-- Delete Modal -->
+                            <div class="modal fade" id="deleteModal{{ product.id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content bg-dark text-light">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Confirm Delete</h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Are you sure you want to delete <strong>{{ product.name }}</strong>?
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <form action="{{ url_for('admin_delete_product', product_id=product.id) }}" method="POST">
+                                                <button type="submit" class="btn btn-danger">Delete</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="mt-4">
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .table {
+        color: var(--text-light);
+    }
+    
+    .table thead {
+        background-color: rgba(15, 15, 35, 0.8);
+    }
+    
+    .table tbody tr {
+        background-color: rgba(15, 15, 35, 0.4);
+    }
+    
+    .table tbody tr:hover {
+        background-color: rgba(0, 247, 255, 0.1);
+    }
+    
+    .modal-content {
+        background-color: var(--card-bg) !important;
+        border: 1px solid rgba(0, 247, 255, 0.2);
+    }
+    
+    .modal-header {
+        border-bottom: 1px solid rgba(0, 247, 255, 0.2);
+    }
+    
+    .modal-footer {
+        border-top: 1px solid rgba(0, 247, 255, 0.2);
+    }
+</style>
+{% endblock %} 

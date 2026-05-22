@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Search Results - DuelTech{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="glass-card p-4">
+        <h1 class="mb-4">Search Results for "{{ query }}"</h1>
+        
+        {% if products|length > 0 %}
+            <p class="text-muted mb-4">Found {{ products|length }} product(s) matching your search.</p>
+            
+            <div class="row">
+                {% for product in products %}
+                <div class="col-md-4 col-lg-3 mb-4">
+                    <div class="glass-card h-100">
+                        <div class="card-body text-center">
+                            <div class="product-icon-wrapper mb-3">
+                                <i class="fas fa-microchip fa-3x product-icon"></i>
+                            </div>
+                            <h5 class="card-title">{{ product.name }}</h5>
+                            <p class="text-brand mb-1">{{ product.brand }}</p>
+                            <p class="price mb-2">{{ product.price }}</p>
+                            <div class="rating mb-3">
+                                {% for i in range(product.rating|int) %}
+                                <i class="fas fa-star text-warning"></i>
+                                {% endfor %}
+                                {% if (product.rating % 1) >= 0.5 %}
+                                <i class="fas fa-star-half-alt text-warning"></i>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="d-flex justify-content-between mt-3">
+                                <a href="{{ url_for('product_detail', product_id=product.id) }}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-info-circle me-1"></i>Details
+                                </a>
+                                <a href="{{ url_for('compare') }}?product_id={{ product.id }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-exchange-alt me-1"></i>Compare
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <div class="mb-4">
+                    <i class="fas fa-search fa-5x text-muted"></i>
+                </div>
+                <h3>No products found</h3>
+                <p class="lead mb-4">Try searching for different keywords or browse our product categories below.</p>
+            </div>
+            
+            <h2 class="mt-5 mb-4">Browse By Category</h2>
+            <div class="row">
+                {% for category_id, category in categories.items() %}
+                <div class="col-md-4 col-lg-3 mb-4">
+                    <a href="{{ url_for('category', category_id=category_id) }}" class="tech-category-btn">
+                        <div class="glass-card category-card">
+                            <div class="card-body text-center">
+                                <div class="mb-3">
+                                    <i class="{{ category.icon }} fa-3x"></i>
+                                </div>
+                                <h5>{{ category.name }}</h5>
+                                <p class="text-muted small mb-0">{{ category.description }}</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        <div class="text-center mt-5">
+            <a href="{{ url_for('products_page') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-th-large me-2"></i>View All Products
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .product-icon {
+        color: var(--primary-color);
+    }
+    
+    .text-brand {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+    
+    .price {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+</style>
+{% endblock %} 

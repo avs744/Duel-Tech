@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Users - DuelTech{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="glass-card p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Manage Users</h1>
+            <a href="{{ url_for('create_admin') }}" class="btn btn-primary">
+                <i class="fas fa-user-shield me-2"></i>Create Admin
+            </a>
+        </div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Joined</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            {% if user.is_admin %}
+                            <span class="badge bg-primary">Admin</span>
+                            {% else %}
+                            <span class="badge bg-secondary">User</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ user.created_at.strftime('%Y-%m-%d') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="mt-4">
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .table {
+        color: var(--text-light);
+    }
+    
+    .table thead {
+        background-color: rgba(15, 15, 35, 0.8);
+    }
+    
+    .table tbody tr {
+        background-color: rgba(15, 15, 35, 0.4);
+    }
+    
+    .table tbody tr:hover {
+        background-color: rgba(0, 247, 255, 0.1);
+    }
+    
+    .badge.bg-primary {
+        background-color: var(--primary-color) !important;
+    }
+</style>
+{% endblock %} 

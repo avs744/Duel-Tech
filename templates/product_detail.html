@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }} - DuelTech{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card glass-effect animate__animated animate__fadeInLeft">
+                <div class="card-body">
+                    <h2 class="mb-4">{{ product.name }}</h2>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <img src="{{ product.image }}" alt="{{ product.name }}" class="product-image mb-3">
+                        </div>
+                        <div class="col-md-6">
+                            <div class="price-tag mb-3">
+                                <h3>{{ product.price }}</h3>
+                            </div>
+                            <div class="rating-box glass-effect mb-3">
+                                <h5>Rating</h5>
+                                {% for i in range(5) %}
+                                    {% if i < product.rating %}
+                                        <i class="fas fa-star text-warning"></i>
+                                    {% else %}
+                                        <i class="far fa-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <button class="btn btn-primary mb-3" onclick="addToCompare('{{ product.id }}')">
+                                <i class="fas fa-exchange-alt"></i> Add to Compare
+                            </button>
+                            <a href="{{ url_for('products_page') }}" class="btn btn-primary">
+                                Browse All Products
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="specs-section mt-4">
+                        <h4>Specifications</h4>
+                        <div class="row">
+                            {% for spec_name, spec_value in product.specs.items() %}
+                            <div class="col-md-6 mb-2">
+                                <div class="spec-item glass-effect p-2">
+                                    <strong>{{ spec_name|title }}:</strong> {{ spec_value }}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="description-section mt-4">
+                        <h4>Description</h4>
+                        <p>{{ product.description }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card glass-effect animate__animated animate__fadeInRight">
+                <div class="card-body">
+                    <h4 class="mb-4">Similar Products</h4>
+                    {% for similar in similar_products %}
+                    <div class="similar-product glass-effect">
+                        <h5>{{ similar.name }}</h5>
+                        <p class="mb-2">{{ similar.price }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="rating">
+                                {% for i in range(similar.rating|int) %}
+                                <i class="fas fa-star text-warning"></i>
+                                {% endfor %}
+                            </div>
+                            <a href="{{ url_for('product_detail', product_id=similar.id) }}" 
+                               class="btn btn-outline-primary btn-sm">View</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.product-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+}
+.price-tag h3 {
+    color: var(--secondary-color);
+    font-weight: bold;
+}
+.rating-box {
+    padding: 10px;
+    border-radius: 5px;
+}
+.similar-product {
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 8px;
+    transition: transform 0.2s;
+}
+.similar-product:hover {
+    transform: translateY(-5px);
+}
+</style>
+
+{% block extra_scripts %}
+<script>
+function addToCompare(productId) {
+    let compareList = JSON.parse(localStorage.getItem('compareList') || '[]');
+    if (!compareList.includes(productId)) {
+        compareList.push(productId);
+        localStorage.setItem('compareList', JSON.stringify(compareList));
+        alert('Product added to comparison list!');
+    } else {
+        alert('This product is already in your comparison list!');
+    }
+}
+</script>
+{% endblock %}
+{% endblock %}

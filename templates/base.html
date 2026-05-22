@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+    
+    <!-- CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    
+    <style>
+    :root {
+        --primary-color: #00ffbb;
+        --secondary-color: #4e00ff;
+        --accent-color: #ff00aa;
+        --background-dark: #0a0a18;
+        --card-bg: rgba(15, 15, 35, 0.6);
+        --text-light: rgba(255, 255, 255, 0.95);
+        --text-muted: rgba(255, 255, 255, 0.7);
+        --glow-color: #00f7ff;
+    }
+
+    body {
+        background-color: var(--background-dark);
+        color: var(--text-light);
+        min-height: 100vh;
+        position: relative;
+        margin: 0;
+        overflow-x: hidden;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    #background-animation {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: -1;
+        pointer-events: none;
+    }
+
+    .main-content {
+        position: relative;
+        z-index: 1;
+        min-height: 100vh;
+        background: linear-gradient(135deg, rgba(0, 255, 187, 0.05), rgba(78, 0, 255, 0.05));
+        backdrop-filter: blur(10px);
+    }
+
+    .navbar {
+        background: rgba(10, 10, 24, 0.85) !important;
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(0, 247, 255, 0.1);
+        box-shadow: 0 2px 15px rgba(0, 247, 255, 0.1);
+    }
+    
+    .navbar-brand {
+        font-weight: 700;
+        background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        position: relative;
+    }
+    
+    .navbar-brand:after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        transform: scaleX(0);
+        height: 2px;
+        bottom: 0;
+        left: 0;
+        background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+        transform-origin: bottom right;
+        transition: transform 0.3s ease-out;
+    }
+    
+    .navbar-brand:hover:after {
+        transform: scaleX(1);
+        transform-origin: bottom left;
+    }
+
+    .nav-link {
+        color: var(--text-light) !important;
+        margin: 0 10px;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+    
+    .nav-link:after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        transform: scaleX(0);
+        height: 2px;
+        bottom: 0;
+        left: 0;
+        background-color: var(--primary-color);
+        transform-origin: bottom right;
+        transition: transform 0.3s ease-out;
+    }
+    
+    .nav-link:hover {
+        color: var(--primary-color) !important;
+    }
+    
+    .nav-link:hover:after {
+        transform: scaleX(1);
+        transform-origin: bottom left;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border: none;
+        box-shadow: 0 4px 15px rgba(0, 247, 255, 0.3);
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 7px 25px rgba(0, 247, 255, 0.5);
+    }
+
+    .glass-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+    
+    .glass-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0, 247, 255, 0.15);
+        border: 1px solid rgba(0, 247, 255, 0.3);
+    }
+
+    .tech-category-btn {
+        text-decoration: none;
+        color: var(--text-light);
+        display: block;
+        transition: all 0.3s ease;
+    }
+    
+    .tech-category-btn:hover {
+        color: var(--text-light);
+        transform: scale(1.03);
+    }
+    
+    .category-card {
+        position: relative;
+        z-index: 1;
+        overflow: hidden;
+    }
+    
+    .category-card:before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent, rgba(0, 247, 255, 0.1), transparent);
+        z-index: -1;
+        transform: rotate(45deg);
+        transition: all 0.8s ease;
+    }
+    
+    .category-card:hover:before {
+        animation: shine 1.5s infinite;
+    }
+    
+    @keyframes shine {
+        0% {
+            top: -50%;
+            left: -50%;
+        }
+        100% {
+            top: 150%;
+            left: 150%;
+        }
+    }
+    
+    .footer {
+        background: rgba(10, 10, 24, 0.9);
+        color: var(--text-light);
+        padding-top: 3rem;
+        margin-top: 3rem;
+        position: relative;
+    }
+    
+    .footer h5 {
+        color: var(--primary-color);
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+    }
+    
+    .footer-links {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .footer-links a {
+        color: var(--text-muted);
+        margin-bottom: 0.8rem;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+    
+    .footer-links a:hover {
+        color: var(--primary-color);
+        transform: translateX(5px);
+    }
+    
+    .footer-bottom {
+        background: rgba(5, 5, 15, 0.8);
+        padding: 1.5rem 0;
+        margin-top: 3rem;
+        font-size: 0.9rem;
+        text-align: center;
+    }
+    
+    .alert {
+        background: var(--card-bg);
+        color: var(--text-light);
+        border: 1px solid rgba(0, 247, 255, 0.2);
+    }
+    
+    .alert-success {
+        border-left: 4px solid var(--primary-color);
+    }
+    
+    .alert-warning {
+        border-left: 4px solid #ffc107;
+    }
+    
+    .alert-danger {
+        border-left: 4px solid #dc3545;
+    }
+
+    /* Animated glow effect */
+    .glow-effect {
+        position: relative;
+    }
+    
+    .glow-effect:after {
+        content: '';
+        position: absolute;
+        top: -5px;
+        left: -5px;
+        right: -5px;
+        bottom: -5px;
+        z-index: -1;
+        background: linear-gradient(45deg, var(--primary-color), var(--secondary-color), var(--accent-color), var(--primary-color));
+        background-size: 400%;
+        border-radius: 20px;
+        filter: blur(20px);
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+    }
+    
+    .glow-effect:hover:after {
+        opacity: 0.8;
+        animation: glowing 8s linear infinite;
+    }
+    
+    @keyframes glowing {
+        0% { background-position: 0 0; }
+        50% { background-position: 400% 0; }
+        100% { background-position: 0 0; }
+    }
+
+    /* 3D floating animation */
+    .float-3d {
+        animation: float 6s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+        0% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(2deg); }
+        100% { transform: translateY(0px) rotate(0deg); }
+    }
+    
+    /* Pulsing effect */
+    .pulse {
+        animation: pulse 3s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+    
+    /* Modern scrollbar */
+    ::-webkit-scrollbar {
+        width: 10px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        background: var(--background-dark);
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color));
+        border-radius: 5px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(to bottom, var(--secondary-color), var(--primary-color));
+    }
+    </style>
+</head>
+<body>
+    <!-- Background Animation -->
+    <div id="background-animation"></div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Navigation Bar -->
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container">
+                <a class="navbar-brand" href="{{ url_for('index') }}">DuelTech</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('products_page') }}">Products</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('compare') }}">Compare</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('about') }}">About</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('contact') }}">Contact</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('chatbot_page') }}">
+                                <i class="fas fa-robot me-1"></i>Tech Assistant
+                            </a>
+                        </li>
+                        {% if current_user.is_authenticated and current_user.is_admin %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('admin_dashboard') }}">
+                                <i class="fas fa-user-shield me-1"></i>Admin
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                    
+                    <!-- Search bar removed from navbar -->
+                    
+                    <ul class="navbar-nav">
+                        {% if current_user.is_authenticated %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user-circle me-1"></i>{{ current_user.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                <li><a class="dropdown-item" href="{{ url_for('logout') }}">Logout</a></li>
+                            </ul>
+                        </li>
+                        {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('register') }}">Register</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="container mt-3">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Page Content -->
+        {% block content %}{% endblock %}
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container footer-content">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h5>DuelTech</h5>
+                        <p>Your trusted source for tech product comparisons. We help you make informed decisions about your next tech purchase.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h5>Quick Links</h5>
+                        <div class="footer-links">
+                            <a href="{{ url_for('index') }}">Home</a>
+                            <a href="{{ url_for('products_page') }}">Products</a>
+                            <a href="{{ url_for('about') }}">About</a>
+                            <a href="{{ url_for('contact') }}">Contact</a>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <h5>Connect With Us</h5>
+                        <p>Follow us on social media for the latest tech updates and comparisons.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 3D Social Icons -->
+            <div id="social-icons-3d"></div>
+
+            <div class="footer-bottom">
+                <div class="container">
+                    <p>&copy; 2025 DuelTech. All rights reserved.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.7.1/gsap.min.js"></script>
+    <script src="{{ url_for('static', filename='js/background-animation.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/social-icons-3d.js') }}"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

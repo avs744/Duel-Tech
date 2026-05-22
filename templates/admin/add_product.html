@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block title %}Add New Product - DuelTech{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="glass-card p-4">
+        <h1 class="mb-4">Add New Product</h1>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <form method="POST" action="{{ url_for('admin_add_product') }}">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="name" class="form-label">Product Name</label>
+                    <input type="text" class="form-control" id="name" name="name" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="brand" class="form-label">Brand</label>
+                    <input type="text" class="form-control" id="brand" name="brand" required>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="category" class="form-label">Category</label>
+                    <select class="form-select" id="category" name="category" required>
+                        {% for category_id, category in categories.items() %}
+                        <option value="{{ category_id }}">{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="price" class="form-label">Price</label>
+                    <input type="text" class="form-control" id="price" name="price" placeholder="₹50,000" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="rating" class="form-label">Rating (0-5)</label>
+                    <input type="number" class="form-control" id="rating" name="rating" min="0" max="5" step="0.1" value="4.0" required>
+                </div>
+            </div>
+            
+            <h3 class="mt-4 mb-3">Product Specifications</h3>
+            
+            <div id="specs-container">
+                <div class="row mb-3 spec-row">
+                    <div class="col-md-5">
+                        <input type="text" class="form-control" name="spec_key_1" placeholder="Spec Name (e.g. processor)">
+                    </div>
+                    <div class="col-md-5">
+                        <input type="text" class="form-control" name="spec_value_1" placeholder="Spec Value (e.g. Intel i7)">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-danger w-100 remove-spec" disabled>
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <button type="button" id="add-spec-btn" class="btn btn-outline-primary">
+                    <i class="fas fa-plus me-2"></i>Add Specification
+                </button>
+            </div>
+            
+            <div class="d-flex justify-content-between">
+                <a href="{{ url_for('admin_products') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Cancel
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-2"></i>Save Product
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .form-control, .form-select {
+        background-color: rgba(15, 15, 35, 0.3);
+        border: 1px solid rgba(0, 247, 255, 0.3);
+        color: var(--text-light);
+    }
+    
+    .form-control:focus, .form-select:focus {
+        background-color: rgba(15, 15, 35, 0.5);
+        border-color: var(--primary-color);
+        color: var(--text-light);
+        box-shadow: 0 0 0 0.25rem rgba(0, 247, 255, 0.25);
+    }
+    
+    .form-label {
+        color: var(--primary-color);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add Specification Button
+        const addSpecBtn = document.getElementById('add-spec-btn');
+        const specsContainer = document.getElementById('specs-container');
+        let specCount = 1;
+        
+        addSpecBtn.addEventListener('click', function() {
+            specCount++;
+            
+            const newRow = document.createElement('div');
+            newRow.className = 'row mb-3 spec-row';
+            newRow.innerHTML = `
+                <div class="col-md-5">
+                    <input type="text" class="form-control" name="spec_${specCount}_key" placeholder="Spec Name">
+                </div>
+                <div class="col-md-5">
+                    <input type="text" class="form-control" name="spec_${specCount}_value" placeholder="Spec Value">
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-danger w-100 remove-spec">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            
+            specsContainer.appendChild(newRow);
+            
+            // Enable all remove buttons
+            document.querySelectorAll('.remove-spec').forEach(btn => {
+                btn.disabled = document.querySelectorAll('.spec-row').length <= 1;
+            });
+        });
+        
+        // Remove Specification Button
+        specsContainer.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-spec') || e.target.parentElement.classList.contains('remove-spec')) {
+                const button = e.target.classList.contains('remove-spec') ? e.target : e.target.parentElement;
+                const row = button.closest('.spec-row');
+                
+                row.remove();
+                
+                // Disable remove button if only one row remains
+                document.querySelectorAll('.remove-spec').forEach(btn => {
+                    btn.disabled = document.querySelectorAll('.spec-row').length <= 1;
+                });
+            }
+        });
+        
+        // Handle form submission
+        document.querySelector('form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Collect all spec inputs and rename them
+            const specRows = document.querySelectorAll('.spec-row');
+            
+            specRows.forEach((row, index) => {
+                const keyInput = row.querySelector('input[name^="spec_"][name$="_key"]');
+                const valueInput = row.querySelector('input[name^="spec_"][name$="_value"]');
+                
+                if (keyInput && valueInput && keyInput.value && valueInput.value) {
+                    // Rename the inputs to match what the server expects
+                    keyInput.name = `spec_${keyInput.value}`;
+                    valueInput.name = `spec_value_${index}`;
+                    
+                    // Move the value to the renamed key
+                    const newInput = document.createElement('input');
+                    newInput.type = 'hidden';
+                    newInput.name = `spec_${keyInput.value}`;
+                    newInput.value = valueInput.value;
+                    
+                    this.appendChild(newInput);
+                }
+            });
+            
+            this.submit();
+        });
+    });
+</script>
+{% endblock %} 

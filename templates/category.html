@@ -1,0 +1,382 @@
+{% extends "base.html" %}
+
+{% block title %}{{ category.name }} - DuelTech{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="glass-card p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>{{ category.name }}</h1>
+            <a id="compareSelectedBtn" href="#" class="btn btn-primary disabled">
+                <i class="fas fa-exchange-alt"></i> Compare Selected (0)
+            </a>
+        </div>
+        
+        <!-- Search and Filter Container -->
+        <div class="glass-card p-3 mb-4">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h4 class="mb-3"><i class="fas fa-search me-2"></i>Search Products</h4>
+                    <form class="d-flex" action="{{ url_for('search') }}" method="get">
+                        <input class="form-control me-2" type="search" name="q" placeholder="Search for tech products..." aria-label="Search">
+                        <button class="btn btn-primary" type="submit">
+                            <i class="fas fa-search me-1"></i> Search
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <hr class="my-3">
+            
+            <h4 class="mb-3"><i class="fas fa-filter me-2"></i>Filter by Price</h4>
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="range-slider">
+                        <input type="range" id="priceRangeMin" min="0" max="100000" value="0" class="price-slider">
+                        <input type="range" id="priceRangeMax" min="0" max="100000" value="100000" class="price-slider">
+                    </div>
+                    <div class="price-inputs d-flex align-items-center mt-2">
+                        <span>₹</span>
+                        <input type="number" id="minPrice" value="0" class="form-control mx-2">
+                        <span>to ₹</span>
+                        <input type="number" id="maxPrice" value="100000" class="form-control mx-2">
+                        <button id="applyPriceFilter" class="btn btn-primary">Apply</button>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="quick-price-filters d-flex flex-column">
+                        <button class="btn btn-outline-primary mb-2" onclick="setQuickFilter(0, 10000)">Under ₹10,000</button>
+                        <button class="btn btn-outline-primary mb-2" onclick="setQuickFilter(10000, 25000)">₹10,000 - ₹25,000</button>
+                        <button class="btn btn-outline-primary mb-2" onclick="setQuickFilter(25000, 50000)">₹25,000 - ₹50,000</button>
+                        <button class="btn btn-outline-primary" onclick="setQuickFilter(50000, 100000)">Above ₹50,000</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            {% for product in products %}
+            <div class="col-md-4">
+                <div class="glass-card h-100 p-4">
+                    <div class="text-center mb-3">
+                        <img src="{{ url_for('static', filename='images/placeholder.png') }}" 
+                             alt="{{ product.name }}" class="img-fluid mb-3" style="max-width: 200px;">
+                        <h4>{{ product.name }}</h4>
+                    </div>
+                    
+                    <div class="specs-list mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="price">{{ product.price }}</span>
+                            <div class="rating">
+                                {% for i in range(product.rating|int) %}
+                                <i class="fas fa-star text-warning"></i>
+                                {% endfor %}
+                                {% if (product.rating % 1) >= 0.5 %}
+                                <i class="fas fa-star-half-alt text-warning"></i>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        {% for key, value in product.specs.items() %}
+                        <div class="spec-item">
+                            <small class="text-muted">{{ key|replace('_', ' ')|title }}:</small>
+                            <span>{{ value }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center mt-auto">
+                        <a href="{{ url_for('product_detail', product_id=product.id) }}" 
+                           class="btn btn-outline-primary">
+                            <i class="fas fa-info-circle"></i> Details
+                        </a>
+                        <button onclick="addToCompare('{{ product.id }}')" 
+                                class="btn btn-primary">
+                            <i class="fas fa-exchange-alt"></i> Add to Compare
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        {% if products|length == 0 %}
+        <div class="text-center py-5">
+            <h3>No products found in this category.</h3>
+            <p>Check back later for new additions!</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.specs-list {
+    font-size: 0.9rem;
+}
+.spec-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.spec-item:last-child {
+    border-bottom: none;
+}
+.price {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #2ecc71;
+}
+.rating {
+    font-size: 1.1rem;
+}
+
+/* Price Filter Styles */
+.price-filter-container {
+    background: rgba(15, 15, 35, 0.8);
+}
+.range-slider {
+    position: relative;
+    width: 100%;
+    height: 30px;
+    margin-bottom: 10px;
+}
+.price-slider {
+    position: absolute;
+    width: 100%;
+    height: 5px;
+    background: none;
+    pointer-events: none;
+    -webkit-appearance: none;
+}
+.price-slider::-webkit-slider-thumb {
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    cursor: pointer;
+    pointer-events: auto;
+    -webkit-appearance: none;
+    box-shadow: 0 0 10px rgba(0, 247, 255, 0.5);
+}
+.price-slider::-moz-range-thumb {
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    cursor: pointer;
+    pointer-events: auto;
+    box-shadow: 0 0 10px rgba(0, 247, 255, 0.5);
+}
+.price-inputs input {
+    width: 80px;
+    text-align: center;
+}
+.hidden-product {
+    display: none;
+}
+</style>
+
+<script>
+// Array to store selected products for comparison
+let selectedProducts = [];
+const MAX_COMPARE_PRODUCTS = 4;
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize selected products from URL parameters (if any)
+    const urlParams = new URLSearchParams(window.location.search);
+    const productIds = urlParams.getAll('product_id');
+    
+    if (productIds.length > 0) {
+        selectedProducts = productIds;
+        updateCompareButton();
+    }
+    
+    // Initialize price filter elements
+    initPriceFilter();
+});
+
+function addToCompare(productId) {
+    const button = document.querySelector(`button[onclick="addToCompare('${productId}')"]`);
+    
+    // Check if product is already selected
+    const index = selectedProducts.indexOf(productId);
+    
+    if (index === -1) {
+        // Add product if not already in the list and not exceeding max
+        if (selectedProducts.length < MAX_COMPARE_PRODUCTS) {
+            selectedProducts.push(productId);
+            button.classList.add('btn-success');
+            button.classList.remove('btn-primary');
+            button.innerHTML = '<i class="fas fa-check"></i> Added';
+        } else {
+            // Alert user if max products reached
+            alert(`You can compare up to ${MAX_COMPARE_PRODUCTS} products at a time.`);
+        }
+    } else {
+        // Remove product if already in the list
+        selectedProducts.splice(index, 1);
+        button.classList.add('btn-primary');
+        button.classList.remove('btn-success');
+        button.innerHTML = '<i class="fas fa-exchange-alt"></i> Add to Compare';
+    }
+    
+    updateCompareButton();
+}
+
+function updateCompareButton() {
+    const compareBtn = document.getElementById('compareSelectedBtn');
+    
+    if (selectedProducts.length > 0) {
+        compareBtn.classList.remove('disabled');
+        compareBtn.innerHTML = `<i class="fas fa-exchange-alt"></i> Compare Selected (${selectedProducts.length})`;
+        
+        // Build the comparison URL with selected product IDs
+        let compareUrl = "{{ url_for('compare') }}?";
+        selectedProducts.forEach(id => {
+            compareUrl += `product_id=${id}&`;
+        });
+        compareUrl += `category={{ selected_category }}`;
+        
+        compareBtn.href = compareUrl;
+    } else {
+        compareBtn.classList.add('disabled');
+        compareBtn.innerHTML = '<i class="fas fa-exchange-alt"></i> Compare Selected (0)';
+        compareBtn.href = '#';
+    }
+}
+
+// Price Filter Functions
+function initPriceFilter() {
+    const minSlider = document.getElementById('priceRangeMin');
+    const maxSlider = document.getElementById('priceRangeMax');
+    const minInput = document.getElementById('minPrice');
+    const maxInput = document.getElementById('maxPrice');
+    const applyButton = document.getElementById('applyPriceFilter');
+    
+    // Set initial max value based on highest priced product
+    let highestPrice = 0;
+    document.querySelectorAll('.price').forEach(priceElement => {
+        // Extract numeric value from price string (e.g., "₹25,000" -> 25000)
+        const priceText = priceElement.textContent.trim();
+        const priceValue = parseInt(priceText.replace(/[^0-9]/g, ''));
+        if (priceValue > highestPrice) {
+            highestPrice = priceValue;
+        }
+    });
+    
+    // Add 20% buffer to highest price
+    const maxPrice = Math.ceil(highestPrice * 1.2 / 1000) * 1000;
+    minSlider.max = maxPrice;
+    maxSlider.max = maxPrice;
+    maxSlider.value = maxPrice;
+    maxInput.value = maxPrice;
+    
+    // Slider event listeners
+    minSlider.addEventListener('input', () => {
+        const minVal = parseInt(minSlider.value);
+        const maxVal = parseInt(maxSlider.value);
+        
+        if (minVal > maxVal) {
+            minSlider.value = maxVal;
+            minInput.value = maxVal;
+        } else {
+            minInput.value = minVal;
+        }
+    });
+    
+    maxSlider.addEventListener('input', () => {
+        const minVal = parseInt(minSlider.value);
+        const maxVal = parseInt(maxSlider.value);
+        
+        if (maxVal < minVal) {
+            maxSlider.value = minVal;
+            maxInput.value = minVal;
+        } else {
+            maxInput.value = maxVal;
+        }
+    });
+    
+    // Input field event listeners
+    minInput.addEventListener('change', () => {
+        const minVal = parseInt(minInput.value);
+        const maxVal = parseInt(maxInput.value);
+        
+        if (minVal > maxVal) {
+            minInput.value = maxVal;
+            minSlider.value = maxVal;
+        } else {
+            minSlider.value = minVal;
+        }
+    });
+    
+    maxInput.addEventListener('change', () => {
+        const minVal = parseInt(minInput.value);
+        const maxVal = parseInt(maxInput.value);
+        
+        if (maxVal < minVal) {
+            maxInput.value = minVal;
+            maxSlider.value = minVal;
+        } else {
+            maxSlider.value = maxVal;
+        }
+    });
+    
+    // Apply filter button
+    applyButton.addEventListener('click', applyPriceFilter);
+}
+
+function applyPriceFilter() {
+    const minPrice = parseInt(document.getElementById('minPrice').value);
+    const maxPrice = parseInt(document.getElementById('maxPrice').value);
+    
+    // Get all product cards
+    const productCards = document.querySelectorAll('.col-md-4');
+    let visibleCount = 0;
+    
+    productCards.forEach(card => {
+        // Get price element within this card
+        const priceElement = card.querySelector('.price');
+        if (priceElement) {
+            // Extract numeric value from price string (e.g., "₹25,000" -> 25000)
+            const priceText = priceElement.textContent.trim();
+            const priceValue = parseInt(priceText.replace(/[^0-9]/g, ''));
+            
+            // Show/hide based on price range
+            if (priceValue >= minPrice && priceValue <= maxPrice) {
+                card.classList.remove('hidden-product');
+                visibleCount++;
+            } else {
+                card.classList.add('hidden-product');
+            }
+        }
+    });
+    
+    // Show message if no products match filter
+    const noResultsMessage = document.getElementById('noFilterResults');
+    if (visibleCount === 0) {
+        if (!noResultsMessage) {
+            const message = document.createElement('div');
+            message.id = 'noFilterResults';
+            message.className = 'alert alert-info mt-4 text-center';
+            message.innerHTML = `<i class="fas fa-info-circle me-2"></i>No products found in the price range ₹${minPrice} - ₹${maxPrice}`;
+            document.querySelector('.row.g-4').after(message);
+        }
+    } else if (noResultsMessage) {
+        noResultsMessage.remove();
+    }
+}
+
+function setQuickFilter(min, max) {
+    // Update slider and input values
+    document.getElementById('priceRangeMin').value = min;
+    document.getElementById('priceRangeMax').value = max;
+    document.getElementById('minPrice').value = min;
+    document.getElementById('maxPrice').value = max;
+    
+    // Apply the filter
+    applyPriceFilter();
+}
+</script>
+{% endblock %}
